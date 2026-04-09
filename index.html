@@ -4,123 +4,155 @@
     <meta charset="UTF-8">
     <title>MOMENTUM v4 | BY PICKLEMUNCHER417</title>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; background: #050505; color: #00ff00; padding: 20px; }
-        h1 { text-align: center; color: #fff; text-shadow: 0 0 10px #00d4ff; margin-bottom: 5px; }
-        .credit { text-align: center; color: #00ff00; font-weight: bold; margin-bottom: 30px; letter-spacing: 2px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 30px; }
-        .op-card { background: #111; padding: 10px; border: 1px solid #333; border-radius: 4px; display: flex; flex-direction: column; }
-        .weapon { color: #888; font-size: 0.7em; margin-bottom: 8px; overflow: hidden; white-space: nowrap; }
-        button { background: #00ff00; color: #000; border: none; padding: 6px; cursor: pointer; font-weight: bold; font-size: 0.8em; }
-        button:hover { background: #fff; box-shadow: 0 0 8px #00ff00; }
-        .category { color: #00d4ff; font-size: 1.2em; margin: 20px 0 10px 0; border-left: 4px solid #00d4ff; padding-left: 10px; text-transform: uppercase; }
-        .sec-title { color: #ff00ff; border-left: 4px solid #ff00ff; }
-        .copied { background: #ff00ff !important; color: white; }
+        body { font-family: 'Courier New', Courier, monospace; background: #050505; color: #00ff00; padding: 20px; overflow-x: hidden; }
+        
+        .rainbow-text {
+            text-align: center; font-weight: bold;
+            background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
+            background-size: 200% auto; color: transparent;
+            -webkit-background-clip: text; background-clip: text;
+            animation: rainbowPulse 4s linear infinite;
+        }
+        @keyframes rainbowPulse { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+
+        h1 { font-size: 2.8em; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        .credit { font-size: 1.3em; margin-bottom: 40px; letter-spacing: 5px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-bottom: 40px; }
+        .op-card { 
+            background: #111; padding: 15px; border-radius: 20px; 
+            display: flex; flex-direction: column; position: relative;
+            z-index: 1; overflow: hidden; border: 2px solid rgba(255,255,255,0.05); transition: 0.3s ease;
+        }
+        .op-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+            animation: rotateRGB 4s linear infinite; z-index: -2;
+        }
+        .op-card::after { content: ''; position: absolute; inset: 3px; background: #111; border-radius: 17px; z-index: -1; }
+        @keyframes rotateRGB { 100% { transform: rotate(360deg); } }
+        .op-card:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 0, 0.3); }
+
+        .weapon { color: #888; font-size: 0.75em; margin-bottom: 10px; text-align: center; }
+        .controls { display: flex; gap: 5px; z-index: 5; }
+        button { background: #000; color: #00ff00; border: 1px solid #00ff00; padding: 8px; border-radius: 12px; cursor: pointer; font-weight: bold; flex: 3; transition: 0.3s; }
+        button:hover { background: #00ff00; color: #000; }
+        .fav-btn { flex: 1; font-size: 1.2em; color: #555; border-color: #333; }
+        .fav-btn.active { color: #ff0000; border-color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+        
+        .category { color: #00d4ff; font-size: 1.4em; margin: 30px 0 15px 0; border-left: 5px solid #00d4ff; padding-left: 12px; text-transform: uppercase; }
+        .fav-title { color: #ffab00; border-left: 5px solid #ffab00; }
+        .sec-title { color: #ff00ff; border-left: 5px solid #ff00ff; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <h1>MOMENTUM v4 ENGINE</h1>
-    <div class="credit">MADE BY PICKLEMUNCHER417</div>
+    <h1 class="rainbow-text">MOMENTUM v4 ENGINE</h1>
+    <div class="credit rainbow-text">MADE BY PICKLEMUNCHER417</div>
+
+    <div id="fav-container" class="hidden">
+        <div class="category fav-title">⭐ TOP PICKS: ATTACK</div>
+        <div id="fav-attack-grid" class="grid"></div>
+        <div class="category fav-title">⭐ TOP PICKS: DEFENSE</div>
+        <div id="fav-defend-grid" class="grid"></div>
+    </div>
 
     <div class="category">Attackers</div>
     <div id="attack-grid" class="grid"></div>
-
     <div class="category">Defenders</div>
     <div id="defend-grid" class="grid"></div>
-
     <div class="category sec-title">Secondaries</div>
     <div id="secondary-grid" class="grid"></div>
 
     <script>
         const attackers = [
-            {n:"Ash", w:"R4-C", y:52, x:-2}, {n:"Twitch", w:"F2", y:68, x:-3}, {n:"Ace/Fuze", w:"AK-12", y:48, x:-1},
-            {n:"Buck", w:"C8-SFW", y:58, x:-2}, {n:"Sledge", w:"L85A2", y:35, x:0}, {n:"Thatcher", w:"AR33", y:42, x:-1},
-            {n:"Thermite/Osa", w:"556xi", y:40, x:0}, {n:"IQ", w:"552 Comm", y:44, x:0}, {n:"Hibana", w:"Type-89", y:54, x:-2},
-            {n:"Jackal", w:"C7E", y:45, x:0}, {n:"Ying", w:"T-95", y:42, x:0}, {n:"Zofia", w:"M762", y:62, x:3},
-            {n:"Dokkaebi", w:"Mk 14", y:40, x:0}, {n:"Lion", w:"V308", y:45, x:0}, {n:"Finka", w:"Spear", y:42, x:0},
-            {n:"Maverick", w:"M4", y:48, x:1}, {n:"Nomad/Iana", w:"ARX200", y:44, x:0}, {n:"Gridlock", w:"F90", y:42, x:0},
-            {n:"Nøkk", w:"FMG-9", y:35, x:0}, {n:"Amaru", w:"G8A1", y:46, x:0}, {n:"Zero", w:"SC3000K", y:50, x:-1},
-            {n:"Flores", w:"AR33", y:42, x:-1}, {n:"Sens", w:"POF-9", y:65, x:4}, {n:"Grim", w:"552 Comm", y:44, x:0},
-            {n:"Brava", w:"PARA-308", y:38, x:0}, {n:"Ram", w:"R4-C", y:52, x:-2}, {n:"Deimos", w:"AK-74M", y:42, x:0},
-            {n:"Striker", w:"M4", y:48, x:1}
+            {id:"ash", n:"Ash", w:"R4-C", y:52, x:-2}, {id:"twitch", n:"Twitch", w:"F2", y:68, x:-3}, {id:"ace", n:"Ace/Fuze", w:"AK-12", y:48, x:-1},
+            {id:"buck", n:"Buck", w:"C8-SFW", y:58, x:-2}, {id:"sledge", n:"Sledge", w:"L85A2", y:35, x:0}, {id:"zero", n:"Zero", w:"SC3000K", y:50, x:-1},
+            {id:"hibana", n:"Hibana", w:"Type-89", y:54, x:-2}, {id:"jackal", n:"Jackal", w:"C7E", y:45, x:0}, {id:"zofia", n:"Zofia", w:"M762", y:62, x:3},
+            {id:"iana", n:"Iana", w:"ARX200", y:44, x:0}, {id:"nomad", n:"Nomad", w:"ARX200", y:44, x:0}, {id:"deimos", n:"Deimos", w:"AK-74M", y:42, x:0},
+            {id:"striker", n:"Striker", w:"M4", y:48, x:1}, {id:"ram", n:"Ram", w:"R4-C", y:52, x:-2}, {id:"brava", n:"Brava", w:"PARA-308", y:38, x:0},
+            {id:"maverick", n:"Maverick", w:"M4", y:48, x:1}, {id:"finka", n:"Finka", w:"Spear", y:42, x:0}, {id:"lion", n:"Lion", w:"V308", y:45, x:0},
+            {id:"ying", n:"Ying", w:"T-95", y:42, x:0}, {id:"iq", n:"IQ", w:"552 Comm", y:44, x:0}, {id:"blitz", n:"Blitz", w:"P12", y:15, x:0},
+            {id:"monty", n:"Monty", w:"P9", y:15, x:0}, {id:"glaz", n:"Glaz", w:"OTS-03", y:45, x:0}, {id:"thermite", n:"Thermite", w:"556xi", y:40, x:0},
+            {id:"thatcher", n:"Thatcher", w:"AR33", y:42, x:-1}, {id:"sens", n:"Sens", w:"POF-9", y:65, x:4}, {id:"grim", n:"Grim", w:"552 Comm", y:44, x:0},
+            {id:"osa", n:"Osa", w:"556xi", y:40, x:0}, {id:"flores", n:"Flores", w:"AR33", y:42, x:-1}, {id:"kali", n:"Kali", w:"CSRX", y:25, x:0},
+            {id:"amaru", n:"Amaru", w:"G8A1", y:46, x:0}, {id:"nokk", n:"Nøkk", w:"FMG-9", y:35, x:0}, {id:"gridlock", n:"Gridlock", w:"F90", y:42, x:0},
+            {id:"dokk", n:"Dokkaebi", w:"Mk 14", y:40, x:0}, {id:"capitao", n:"Capitão", w:"PARA-308", y:38, x:0}, {id:"bb", n:"Blackbeard", w:"MK17", y:42, x:0}
         ];
 
         const defenders = [
-            {n:"Smoke", w:"FMG-9", y:35, x:0}, {n:"Mute/Wamai", w:"MP5K", y:38, x:0}, {n:"Castle/Pulse", w:"UMP45", y:30, x:0},
-            {n:"Doc/Rook/Mel", w:"MP5", y:35, x:0}, {n:"Kapkan/Azami", w:"9x19", y:35, x:0}, {n:"Tachanka", w:"DP27", y:40, x:0},
-            {n:"Jäger", w:"416-C", y:45, x:2}, {n:"Bandit/Fenrir", w:"MP7", y:42, x:-1}, {n:"Frost", w:"9mm C1", y:28, x:0},
-            {n:"Valk/Warden", w:"MPX", y:34, x:0}, {n:"Caveira", w:"M12", y:28, x:0}, {n:"Echo", w:"MP5SD", y:35, x:0},
-            {n:"Mira/Goyo", w:"Vector", y:65, x:-4}, {n:"Lesion/Oryx", w:"T-5", y:38, x:0}, {n:"Ela", w:"Scorpion", y:75, x:5},
-            {n:"Vigil", w:"K1A", y:36, x:0}, {n:"Maestro", w:"ALDA", y:55, x:1}, {n:"Alibi", w:"Mx4", y:44, x:0},
-            {n:"Kaid", w:"AUG A3", y:34, x:0}, {n:"Mozzie", w:"Roni", y:40, x:0}, {n:"Thunderbird", w:"Spear", y:42, x:0},
-            {n:"Thorn", w:"UZK50", y:38, x:0}, {n:"Solis", w:"P90", y:48, x:0}, {n:"Tubarão", w:"MPX", y:34, x:0},
-            {n:"Skopós", w:"PCX-3", y:44, x:0}, {n:"Sentry", w:"Commando 9", y:36, x:0}
+            {id:"smoke", n:"Smoke", w:"FMG-9", y:35, x:0}, {id:"mute", n:"Mute", w:"MP5K", y:38, x:0}, {id:"jager", n:"Jäger", w:"416-C", y:45, x:2},
+            {id:"bandit", n:"Bandit", w:"MP7", y:42, x:-1}, {id:"mira", n:"Mira", w:"Vector", y:65, x:-4}, {id:"lesion", n:"Lesion", w:"T-5", y:38, x:0},
+            {id:"ela", id:"ela", n:"Ela", w:"Scorpion", y:75, x:5}, {id:"vigil", n:"Vigil", w:"K1A", y:36, x:0}, {id:"mozzie", n:"Mozzie", w:"Roni", y:40, x:0},
+            {id:"valk", n:"Valkyrie", w:"MPX", y:34, x:0}, {id:"pulse", n:"Pulse", w:"UMP45", y:30, x:0}, {id:"doc", n:"Doc/Rook", w:"MP5", y:35, x:0},
+            {id:"kapkan", n:"Kapkan", w:"9x19", y:35, x:0}, {id:"fenrir", n:"Fenrir", w:"MP7", y:42, x:-1}, {id:"solis", n:"Solis", w:"P90", y:48, x:0},
+            {id:"azami", n:"Azami", w:"9x19", y:35, x:0}, {id:"skopos", n:"Skopós", w:"PCX-3", y:44, x:0}, {id:"sentry", n:"Sentry", w:"Commando 9", y:36, x:0},
+            {id:"tubarao", n:"Tubarão", w:"MPX", y:34, x:0}, {id:"thorn", n:"Thorn", w:"UZK50", y:38, x:0}, {id:"thunder", n:"Thunderbird", w:"Spear", y:42, x:0},
+            {id:"aruni", n:"Aruni", w:"Roni", y:40, x:0}, {id:"melusi", n:"Melusi", w:"MP5", y:35, x:0}, {id:"oryx", n:"Oryx", w:"T-5", y:38, x:0},
+            {id:"wamai", n:"Wamai", w:"MP5K", y:38, x:0}, {id:"goyo", n:"Goyo", w:"Vector", y:65, x:-4}, {id:"warden", n:"Warden", w:"MPX", y:34, x:0},
+            {id:"kaid", n:"Kaid", w:"AUG A3", y:34, x:0}, {id:"maestro", n:"Maestro", w:"ALDA", y:55, x:1}, {id:"alibi", n:"Alibi", w:"Mx4", y:44, x:0},
+            {id:"caveira", n:"Caveira", w:"M12", y:28, x:0}, {id:"echo", n:"Echo", w:"MP5SD", y:35, x:0}, {id:"frost", n:"Frost", w:"9mm C1", y:28, x:0},
+            {id:"castle", n:"Castle", w:"UMP45", y:30, x:0}, {id:"tachanka", n:"Tachanka", w:"DP27", y:40, x:0}
         ];
 
         const secondaries = [
-            {n:"Smoke/Mute", w:"SMG-11", y:85, x:-6}, {n:"Hibana/Echo", w:"Bearing-9", y:88, x:5},
-            {n:"Vigil/Dokk", w:"SMG-12", y:105, x:10}, {n:"Dokk/Kali", w:"C75 Auto", y:55, x:0},
-            {n:"Glaz/Kali", w:"SPSMG9", y:48, x:0}
+            {id:"smg11", n:"Smoke/Mute", w:"SMG-11", y:85, x:-6}, {id:"bearing9", n:"Hibana/Echo", w:"Bearing-9", y:88, x:5},
+            {id:"smg12", n:"Vigil/Dokk", w:"SMG-12", y:105, x:10}, {id:"c75", n:"Dokk/Kali", w:"C75 Auto", y:55, x:0},
+            {id:"spsmg9", n:"Glaz/Kali", w:"SPSMG9", y:48, x:0}
         ];
 
-        function build(list, gridId) {
+        let favorites = JSON.parse(localStorage.getItem('pkm_favs')) || [];
+
+        function build(list, gridId, isFavGrid = false) {
             const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
             list.forEach(op => {
+                const isFav = favorites.includes(op.id);
+                if (isFavGrid && !isFav) return;
                 const div = document.createElement('div');
                 div.className = 'op-card';
-                div.innerHTML = `<strong>${op.n}</strong><div class="weapon">${op.w}</div>
-                                 <button onclick="copy(this, '${op.n}', '${op.w}', ${op.y}, ${op.x})">V4 SCRIPT</button>`;
+                div.innerHTML = `<strong class="op-name rainbow-text">${op.n}</strong><div class="weapon">${op.w}</div>
+                    <div class="controls"><button onclick="copy(this, '${op.n}', '${op.w}', ${op.y}, ${op.x})">V4 SCRIPT</button>
+                    <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav('${op.id}')">❤</button></div>`;
                 grid.appendChild(div);
             });
         }
 
+        function toggleFav(id) {
+            favorites.includes(id) ? favorites = favorites.filter(f => f !== id) : favorites.push(id);
+            localStorage.setItem('pkm_favs', JSON.stringify(favorites)); refresh();
+        }
+
+        function refresh() {
+            build(attackers, 'attack-grid'); build(defenders, 'defend-grid'); build(secondaries, 'secondary-grid');
+            build(attackers, 'fav-attack-grid', true); build(defenders, 'fav-defend-grid', true);
+            const container = document.getElementById('fav-container');
+            favorites.length > 0 ? container.classList.remove('hidden') : container.classList.add('hidden');
+        }
+
         function copy(btn, name, gun, y, x) {
-            const code = `--[[
-  ███╗   ██╗ ██████╗ ███╗   ███╗ █████╗ ██╗     ██╗   ██╗ ██████╗ 
-  ████╗  ██║██╔═══██╗████╗ ████║██╔══██╗██║     ╚██╗ ██╔╝██╔════╝ 
-  ██╔██╗ ██║██║   ██║██╔████╔██║███████║██║      ╚████╔╝ ╚█████╗  
-  ██║╚██╗██║██║   ██║██║╚██╔╝██║██╔══██║██║       ╚██╔╝   ╚═══██╗ 
-  ██║ ╚████║╚██████╔╝██║ ╚═╝ ██║██║  ██║███████╗   ██║   ██████╔╝ 
-  ╚═╝  ╚═══╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═════╝  
-                                                                  
-  [ STATUS: UNDETECTABLE ]   [ TYPE: EXTERNAL ]   [ REGION: GLOBAL ]
-  [ MODULE: MOMENTUM v4 ]    [ BUILD: 2026.04 ]   [ DEV: NOMALY ]
-  [ OPTIMIZED FOR: ${name} (${gun}) ]    [ MADE BY: PICKLEMUNCHER417 ]
---]]
-
+            const code = `--[[ MOMENTUM v4 | OPTIMIZED FOR: ${name} (${gun}) | MADE BY: PICKLEMUNCHER417 ]]
 EnablePrimaryMouseButtonEvents(true);
-local recoilX = ${x}
-local recoilY = ${y}
-local key = "capslock"
+local recoilX = ${x}; local recoilY = ${y}; local key = "capslock"
 local driftX, driftY = 0, 0
-
 function OnEvent(event, arg)
     if IsKeyLockOn(key) and IsMouseButtonPressed(3) and IsMouseButtonPressed(1) then
-        local shotPower = math.random(-2, 2) 
-        local shotBias = math.random(-1, 1)  
-        local shotSpeed = math.random(-1, 1) 
-        Sleep(math.random(15, 45)) 
-
+        local shotBias = math.random(-1, 1); Sleep(math.random(15, 45)) 
         repeat
-            driftX = driftX + (math.random(-8, 8) / 10) 
-            driftY = driftY + (math.random(-8, 8) / 10)
+            driftX = driftX + (math.random(-8, 8) / 10); driftY = driftY + (math.random(-8, 8) / 10)
             if math.abs(driftX) > 2.5 then driftX = driftX * 0.7 end
             if math.abs(driftY) > 3.5 then driftY = driftY * 0.7 end
             local jX, jY = math.random(-1, 1), math.random(-1, 1)
-
-            MoveMouseRelative(math.floor(recoilX + shotBias + driftX + jX), math.floor(recoilY + shotPower + driftY + jY))
-            Sleep(math.random(8 + shotSpeed, 13 + shotSpeed)) 
+            MoveMouseRelative(math.floor(recoilX + shotBias + driftX + jX), math.floor(recoilY + driftY + jY))
+            Sleep(math.random(8, 13)) 
         until not IsMouseButtonPressed(1)
         driftX, driftY = 0, 0
     end
 end`;
-            navigator.clipboard.writeText(code);
-            btn.innerText = "COPIED!"; btn.className = "copied";
-            setTimeout(() => { btn.innerText = "V4 SCRIPT"; btn.className = ""; }, 1500);
+            navigator.clipboard.writeText(code); btn.innerText = "COPIED!"; btn.classList.add('copied');
+            setTimeout(() => { btn.innerText = "V4 SCRIPT"; btn.classList.remove('copied'); }, 1500);
         }
-
-        build(attackers, 'attack-grid');
-        build(defenders, 'defend-grid');
-        build(secondaries, 'secondary-grid');
+        refresh();
     </script>
 </body>
 </html>
