@@ -19,8 +19,7 @@ button { background: #00ff00; color: #000; border: none; padding: 8px; cursor: p
 #authBox { text-align:center; margin-top:120px; }
 #mainContent { display:none; }
 #status { font-weight: bold; margin-top: 15px; }
-input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8px; text-align: center; width: 280px; }
-.debug-btn { background: #333; color: #888; font-size: 10px; margin-top: 20px; padding: 4px 8px; cursor: pointer; }
+input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8px; text-align: center; width: 250px; }
 </style>
 </head>
 
@@ -35,64 +34,74 @@ input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8p
     <br><br>
     <button onclick="checkKey()">UNLOCK ENGINE</button>
     <p id="status"></p>
-    <button class="debug-btn" onclick="clearSession()">RESET SESSION / CLEAR CACHE</button>
 </div>
 
 <!-- MAIN SITE CONTENT -->
 <div id="mainContent">
-    <h1>MOMENTUM v4 ENGINE</h1>
-    <div class="credit">MADE BY PICKLEMUNCHER417</div>
 
-    <div class="category">Attackers</div>
-    <div id="attack-grid" class="grid"></div>
+<h1>MOMENTUM v4 ENGINE</h1>
+<div class="credit">MADE BY PICKLEMUNCHER417</div>
 
-    <div class="category">Defenders</div>
-    <div id="defend-grid" class="grid"></div>
+<div class="category">Attackers</div>
+<div id="attack-grid" class="grid"></div>
 
-    <div class="category secondary">Secondary SMGs</div>
-    <div id="secondary-grid" class="grid"></div>
-    
-    <center><button onclick="clearSession()" style="background:#444; color:#fff; margin-bottom:50px; padding:10px;">LOGOUT / LOCK ENGINE</button></center>
+<div class="category">Defenders</div>
+<div id="defend-grid" class="grid"></div>
+
+<div class="category secondary">Secondary SMGs</div>
+<div id="secondary-grid" class="grid"></div>
+
 </div>
 
 <script>
-/* ================= WHITELIST SYSTEM (LIVE GITHUB PAGES FIX) ================= */
+/* ================= WHITELIST SYSTEM ================= */
 
-const rawGist = "https://githubusercontent.com";
-const whitelistURL = "https://corsproxy.io?" + encodeURIComponent(rawGist + "?t=" + Date.now());
-
+// !!! REPLACE THIS WITH YOUR RAW GITHUB GIST LINK !!!
+const whitelistURL = "const whitelistURL = "https://gist.githubusercontent.com/picklemuncher417/8bdc7ab2ce82d21624c9187f43d25842/raw/gistfile1.txt";
+"; 
 let allowedKeys = [];
 
-async function fetchKeys() {
-    try {
-        const response = await fetch(whitelistURL);
-        if (!response.ok) throw new Error();
-        const data = await response.text();
-        
-        // Split by lines, trim whitespace, and remove empty lines
-        allowedKeys = data.split(/\r?\n/).map(k => k.trim()).filter(k => k.length > 0);
-        console.log("Database connected. Keys synced.");
-    } catch (err) {
-        console.error(err);
-        document.getElementById("status").innerText = "CONNECTION ERROR - REFRESH PAGE";
+// Fetching from GitHub Gist fixes the "CORS/Access-Control" error
+fetch(whitelistURL)
+.then(res => {
+    if (!res.ok) throw new Error("Connection failed");
+    return res.text();
+})
+.then(data => {
+    // Splits keys by line and removes empty spaces
+    allowedKeys = data.split(/\r?\n/).map(k => k.trim()).filter(k => k.length > 0);
+    console.log("Database connected.");
+    
+    // Auto-login check
+    const savedKey = localStorage.getItem("active_key");
+    if(savedKey && allowedKeys.includes(savedKey)) {
+        unlock();
     }
-}
+})
+.catch(err => {
+    console.error(err);
+    document.getElementById("status").innerText = "SERVER CONNECTION ERROR";
+});
 
-async function checkKey(){
-    const inputField = document.getElementById("keyInput");
-    const input = inputField.value.trim();
+/* ===== AUTH LOGIC ===== */
+
+function checkKey(){
+    const input = document.getElementById("keyInput").value.trim();
     const status = document.getElementById("status");
 
-    status.innerText = "VERIFYING...";
-    await fetchKeys(); // Ensure we have the latest list from the Gist
-
     if(allowedKeys.includes(input)){
+        // Prevent key sharing on the same browser
+        if(localStorage.getItem("active_key") && localStorage.getItem("active_key") !== input){
+            status.innerText = "DEVICE ALREADY BOUND TO ANOTHER KEY";
+            status.style.color = "red";
+            return;
+        }
+
         localStorage.setItem("active_key", input);
         unlock();
     } else {
         status.innerText = "INVALID ACCESS KEY";
         status.style.color = "red";
-        inputField.value = ""; // Clear input for retry
     }
 }
 
@@ -101,36 +110,21 @@ function unlock(){
     document.getElementById("mainContent").style.display = "block";
 }
 
-function clearSession(){
-    localStorage.clear();
-    location.reload();
-}
-
-// Check login status on page load
-window.onload = async () => {
-    await fetchKeys();
-    const savedKey = localStorage.getItem("active_key");
-    if(savedKey && allowedKeys.includes(savedKey)) {
-        unlock();
-    }
-};
-
-/* ================= FULL OPERATOR DATA ================= */
+/* ================= OPERATOR DATA ================= */
 
 const attackers = [
  {n:"Ash", w:"R4-C", y:52, x:-2}, {n:"Twitch", w:"F2", y:68, x:-3}, {n:"Ace/Fuze", w:"AK-12", y:48, x:-1},
  {n:"Buck", w:"C8-SFW", y:58, x:-2}, {n:"Sledge", w:"L85A2", y:35, x:0}, {n:"Thatcher", w:"AR33", y:42, x:-1},
  {n:"Thermite", w:"556xi", y:40, x:0}, {n:"IQ", w:"552 Commando", y:44, x:0}, {n:"Hibana", w:"Type-89", y:54, x:-2},
  {n:"Jackal", w:"C7E", y:45, x:0}, {n:"Zofia", w:"M762", y:62, x:3}, {n:"Nomad", w:"ARX200", y:44, x:0},
- {n:"Zero", w:"SC3000K", y:50, x:-1}, {n:"Ram", w:"R4-C", y:52, x:-2}, {n:"Fuze", w:"6P41 LMG", y:42, x:0}
+ {n:"Ace", w:"AK-12", y:48, x:-1}, {n:"Zero", w:"SC3000K", y:50, x:-1}, {n:"Ram", w:"R4-C", y:52, x:-2}
 ];
 
 const defenders = [
  {n:"Smoke", w:"FMG-9", y:35, x:0}, {n:"Mute", w:"MP5K", y:38, x:0}, {n:"Jäger", w:"416-C", y:45, x:2},
  {n:"Bandit", w:"MP7", y:42, x:-1}, {n:"Valkyrie", w:"MPX", y:34, x:0}, {n:"Mira", w:"Vector", y:65, x:-4},
  {n:"Lesion", w:"T-5", y:38, x:0}, {n:"Ela", w:"Scorpion", y:75, x:5}, {n:"Vigil", w:"K1A", y:36, x:0},
- {n:"Mozzie", w:"Roni", y:40, x:0}, {n:"Melusi", w:"MP5", y:35, x:0}, {n:"Fenrir", w:"MP7", y:42, x:-1},
- {n:"Wamai", w:"MP5K", y:38, x:0}, {n:"Kaid", w:"AUG A3", y:36, x:0}, {n:"Pulse", w:"UMP45", y:32, x:0}
+ {n:"Mozzie", w:"Roni", y:40, x:0}, {n:"Melusi", w:"MP5", y:35, x:0}, {n:"Fenrir", w:"MP7", y:42, x:-1}
 ];
 
 const secondaries = [
@@ -158,6 +152,7 @@ function build(list, gridId){
 function copy(btn, y, x){
     const code = "recoilX=" + x + "\nrecoilY=" + y;
     navigator.clipboard.writeText(code);
+
     btn.innerText = "COPIED!";
     btn.className = "copied";
     setTimeout(()=>{ btn.innerText="GET V4 ENGINE"; btn.className=""; },1500);
