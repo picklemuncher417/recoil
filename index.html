@@ -20,6 +20,7 @@ button { background: #00ff00; color: #000; border: none; padding: 8px; cursor: p
 #mainContent { display:none; }
 #status { font-weight: bold; margin-top: 15px; }
 input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8px; text-align: center; width: 280px; }
+.debug-btn { background: #333; color: #888; font-size: 10px; margin-top: 20px; padding: 4px 8px; }
 </style>
 </head>
 
@@ -34,49 +35,53 @@ input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8p
     <br><br>
     <button onclick="checkKey()">UNLOCK ENGINE</button>
     <p id="status"></p>
+    <button class="debug-btn" onclick="clearSession()">RESET SESSION / CLEAR CACHE</button>
 </div>
 
 <!-- MAIN SITE CONTENT -->
 <div id="mainContent">
+    <h1>MOMENTUM v4 ENGINE</h1>
+    <div class="credit">MADE BY PICKLEMUNCHER417</div>
 
-<h1>MOMENTUM v4 ENGINE</h1>
-<div class="credit">MADE BY PICKLEMUNCHER417</div>
+    <div class="category">Attackers</div>
+    <div id="attack-grid" class="grid"></div>
 
-<div class="category">Attackers</div>
-<div id="attack-grid" class="grid"></div>
+    <div class="category">Defenders</div>
+    <div id="defend-grid" class="grid"></div>
 
-<div class="category">Defenders</div>
-<div id="defend-grid" class="grid"></div>
-
-<div class="category secondary">Secondary SMGs</div>
-<div id="secondary-grid" class="grid"></div>
-
+    <div class="category secondary">Secondary SMGs</div>
+    <div id="secondary-grid" class="grid"></div>
+    
+    <center><button onclick="clearSession()" style="background:#444; color:#fff; margin-bottom:50px;">LOGOUT / LOCK ENGINE</button></center>
 </div>
 
 <script>
-/* ================= WHITELIST SYSTEM ================= */
+/* ================= WHITELIST SYSTEM (WITH CACHE BUSTER) ================= */
 
-const whitelistURL = "https://githubusercontent.com"; 
+const gistBase = "https://githubusercontent.com";
 let allowedKeys = [];
 
-fetch(whitelistURL)
-.then(res => { if (!res.ok) throw new Error(); return res.text(); })
-.then(data => {
-    allowedKeys = data.split(/\r?\n/).map(k => k.trim()).filter(k => k.length > 0);
-    const savedKey = localStorage.getItem("active_key");
-    if(savedKey && allowedKeys.includes(savedKey)) unlock();
-})
-.catch(() => { document.getElementById("status").innerText = "SERVER CONNECTION ERROR"; });
+async function fetchKeys() {
+    try {
+        // Adding a timestamp to the URL forces the browser to get the freshest data
+        const response = await fetch(gistBase + "?t=" + Date.now());
+        if (!response.ok) throw new Error();
+        const data = await response.text();
+        allowedKeys = data.split(/\r?\n/).map(k => k.trim()).filter(k => k.length > 0);
+        console.log("Keys synced: ", allowedKeys.length);
+    } catch (err) {
+        document.getElementById("status").innerText = "CONNECTION ERROR - CHECK INTERNET";
+    }
+}
 
-function checkKey(){
+async function checkKey(){
     const input = document.getElementById("keyInput").value.trim();
     const status = document.getElementById("status");
 
+    status.innerText = "VERIFYING...";
+    await fetchKeys(); // Ensure we have the latest list
+
     if(allowedKeys.includes(input)){
-        if(localStorage.getItem("active_key") && localStorage.getItem("active_key") !== input){
-            status.innerText = "DEVICE ALREADY BOUND TO ANOTHER KEY";
-            return;
-        }
         localStorage.setItem("active_key", input);
         unlock();
     } else {
@@ -90,7 +95,21 @@ function unlock(){
     document.getElementById("mainContent").style.display = "block";
 }
 
-/* ================= THE DATA ================= */
+function clearSession(){
+    localStorage.clear();
+    location.reload();
+}
+
+// Check if user is already logged in on load
+window.onload = async () => {
+    await fetchKeys();
+    const savedKey = localStorage.getItem("active_key");
+    if(savedKey && allowedKeys.includes(savedKey)) {
+        unlock();
+    }
+};
+
+/* ================= FULL OPERATOR DATA (ALL GUNS) ================= */
 
 const attackers = [
  {n:"Ash", w:"R4-C", y:52, x:-2}, {n:"Twitch", w:"F2", y:68, x:-3}, {n:"Ace/Fuze", w:"AK-12", y:48, x:-1},
