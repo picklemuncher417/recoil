@@ -7,7 +7,6 @@
         body { font-family: 'Courier New', Courier, monospace; background: #050505; color: #00ff00; padding: 20px; }
         h1 { text-align: center; color: #fff; text-shadow: 0 0 10px #00d4ff; margin-bottom: 5px; }
 
-        /* Unified slow, soft rainbow */
         @keyframes softRainbow {
             0%   { color: #4ade80; border-color: #4ade80; } 
             20%  { color: #60a5fa; border-color: #60a5fa; } 
@@ -26,103 +25,137 @@
             100% { background-color: #4ade80; }
         }
 
-        .credit {
-            text-align: center; font-weight: bold; margin-bottom: 20px;
-            letter-spacing: 2px; animation: softRainbow 20s ease-in-out infinite;
-        }
-
-        #search-bar {
-            padding: 12px; width: 350px; background: #111; border: 2px solid; 
-            color: #fff; border-radius: 4px; outline: none; font-family: inherit;
-            animation: softRainbow 20s ease-in-out infinite;
-        }
-
+        .credit { text-align: center; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; animation: softRainbow 20s ease-in-out infinite; }
+        #search-bar { padding: 12px; width: 350px; background: #111; border: 2px solid; color: #fff; border-radius: 4px; outline: none; animation: softRainbow 20s ease-in-out infinite; }
         .op-card strong { animation: softRainbow 20s ease-in-out infinite; display: block; }
-
-        button { 
-            animation: buttonRainbow 20s ease-in-out infinite;
-            color: #000; border: none; padding: 10px; cursor: pointer; 
-            font-weight: bold; width: 100%; transition: none;
-        }
-
+        button { animation: buttonRainbow 20s ease-in-out infinite; color: #000; border: none; padding: 10px; cursor: pointer; font-weight: bold; width: 100%; transition: none; }
         button:hover { opacity: 0.8; }
-
-        .category { 
-            font-size: 1.3em; margin: 30px 0 10px 0; border-left: 4px solid; 
-            padding-left: 10px; text-transform: uppercase; 
-            animation: softRainbow 20s ease-in-out infinite;
-        }
-
+        .category { font-size: 1.3em; margin: 30px 0 10px 0; border-left: 4px solid; padding-left: 10px; text-transform: uppercase; animation: softRainbow 20s ease-in-out infinite; }
         .copied { background: #ff00ff !important; color: white !important; animation: none; }
-
         #search-container { text-align: center; margin-bottom: 30px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .op-card { background: #111; padding: 12px; border: 1px solid #333; border-radius: 4px; display: flex; flex-direction: column; position: relative; }
         .weapon { color: #888; font-size: 0.75em; margin-bottom: 8px; }
-        .fav-btn { position: absolute; top: 5px; right: 8px; cursor: pointer; color: #333; font-size: 1.2em; transition: 0.2s; }
+        .fav-btn { position: absolute; top: 5px; right: 8px; cursor: pointer; color: #333; font-size: 1.2em; }
         .fav-btn.active { color: #ff00ff; text-shadow: 0 0 5px #ff00ff; }
     </style>
 </head>
 <body>
     <h1>MOMENTUM v4 ENGINE</h1>
     <div class="credit">MADE BY PICKLEMUNCHER417</div>
-
-    <div id="search-container">
-        <input type="text" id="search-bar" placeholder="SEARCH OPERATORS OR WEAPONS...">
-    </div>
-
-    <div id="favorites-section" style="display:none;">
-        <div class="category">⭐ Favorites</div>
-        <div id="fav-grid" class="grid"></div>
-    </div>
-
+    <div id="search-container"><input type="text" id="search-bar" placeholder="SEARCH OPERATORS OR WEAPONS..."></div>
+    <div id="favorites-section" style="display:none;"><div class="category">⭐ Favorites</div><div id="fav-grid" class="grid"></div></div>
     <div id="main-content"></div>
 
     <script>
-        const attackers = [
-            {n:"Ash", w:"R4-C", y:52, x:-2, t:"Entry"}, {n:"Twitch", w:"F2", y:68, x:-3, t:"Entry"}, {n:"Ace/Fuze", w:"AK-12", y:48, x:-1, t:"Support"},
-            {n:"Buck", w:"C8-SFW", y:58, x:-2, t:"Flex"}, {n:"Sledge", w:"L85A2", y:35, x:0, t:"Flex"}, {n:"Thatcher", w:"AR33", y:42, x:-1, t:"Support"},
-            {n:"Thermite", w:"556xi", y:40, x:0, t:"Support"}, {n:"IQ", w:"552 Commando", y:44, x:0, t:"Flex"}, {n:"Hibana", w:"Type-89", y:54, x:-2, t:"Support"},
-            {n:"Jackal", w:"C7E", y:45, x:0, t:"Flex"}, {n:"Ying", w:"T-95 LSW", y:42, x:0, t:"Entry"}, {n:"Zofia", w:"M762", y:62, x:3, t:"Entry"},
-            {n:"Dokkaebi", w:"Mk 14", y:40, x:0, t:"Support"}, {n:"Lion", w:"V308", y:45, x:0, t:"Support"}, {n:"Finka", w:"Spear", y:42, x:0, t:"Support"},
-            {n:"Maverick", w:"M4", y:48, x:1, t:"Support"}, {n:"Nomad", w:"ARX200", y:44, x:0, t:"Flex"}, {n:"Gridlock", w:"F90", y:42, x:0, t:"Support"},
-            {n:"Nøkk", w:"FMG-9", y:35, x:0, t:"Entry"}, {n:"Amaru", w:"G8A1", y:46, x:0, t:"Entry"}, {n:"Iana", w:"ARX200", y:44, x:0, t:"Entry"},
-            {n:"Zero", w:"SC3000K", y:50, x:-1, t:"Support"}, {n:"Flores", w:"AR33", y:42, x:-1, t:"Support"}, {n:"Osa", w:"556xi", y:40, x:0, t:"Support"},
-            {n:"Sens", w:"POF-9", y:65, x:4, t:"Support"}, {n:"Grim", w:"552 Commando", y:44, x:0, t:"Flex"}, {n:"Brava", w:"PARA-308", y:38, x:0, t:"Support"},
-            {n:"Ram", w:"R4-C", y:52, x:-2, t:"Flex"}, {n:"Deimos", w:"AK-74M", y:42, x:0, t:"Flex"}, {n:"Striker", w:"M4", y:48, x:1, t:"Flex"}
-        ];
-
-        const defenders = [
-            {n:"Smoke", w:"FMG-9", y:35, x:0, t:"Anchor"}, {n:"Mute", w:"MP5K", y:38, x:0, t:"Anchor"}, {n:"Castle", w:"UMP45", y:30, x:0, t:"Anchor"},
-            {n:"Pulse", w:"UMP45", y:30, x:0, t:"Roamer"}, {n:"Doc/Rook", w:"MP5", y:35, x:0, t:"Anchor"}, {n:"Kapkan", w:"9x19", y:35, x:0, t:"Trap"},
-            {n:"Tachanka", w:"DP27", y:40, x:0, t:"Anchor"}, {n:"Jäger", w:"416-C", y:45, x:2, t:"Roamer"}, {n:"Bandit", w:"MP7", y:42, x:-1, t:"Roamer"},
-            {n:"Frost", w:"9mm C1", y:28, x:0, t:"Trap"}, {n:"Valkyrie", w:"MPX", y:34, x:0, t:"Roamer"}, {n:"Caveira", w:"M12", y:28, x:0, t:"Roamer"},
-            {n:"Echo", w:"MP5SD", y:35, x:0, t:"Anchor"}, {n:"Mira", w:"Vector", y:65, x:-4, t:"Anchor"}, {n:"Lesion", w:"T-5", y:38, x:0, t:"Trap"},
-            {n:"Ela", w:"Scorpion", y:75, x:5, t:"Trap"}, {n:"Vigil", w:"K1A", y:36, x:0, t:"Roamer"}, {n:"Maestro", w:"ALDA", y:55, x:1, t:"Anchor"},
-            {n:"Alibi", w:"Mx4", y:44, x:0, t:"Roamer"}, {n:"Kaid", w:"AUG A3", y:34, x:0, t:"Anchor"}, {n:"Mozzie", w:"Roni", y:40, x:0, t:"Roamer"},
-            {n:"Warden", w:"MPX", y:34, x:0, t:"Anchor"}, {n:"Goyo", w:"Vector", y:65, x:-4, t:"Trap"}, {n:"Wamai", w:"MP5K", y:38, x:0, t:"Anchor"},
-            {n:"Oryx", w:"T-5", y:38, x:0, t:"Roamer"}, {n:"Melusi", w:"MP5", y:35, x:0, t:"Trap"}, {n:"Aruni", w:"Roni", y:40, x:0, t:"Anchor"},
-            {n:"Thunderbird", w:"Spear", y:42, x:0, t:"Anchor"}, {n:"Thorn", w:"UZK50", y:38, x:0, t:"Trap"}, {n:"Azami", w:"9x19", y:35, x:0, t:"Anchor"},
-            {n:"Solis", w:"P90", y:48, x:0, t:"Roamer"}, {n:"Fenrir", w:"MP7", y:42, x:-1, t:"Trap"}, {n:"Tubarão", w:"MPX", y:34, x:0, t:"Anchor"},
-            {n:"Skopós", w:"PCX-3", y:44, x:0, t:"Anchor"}, {n:"Sentry", w:"Commando 9", y:36, x:0, t:"Anchor"}
+        const allGuns = [
+            {n:"Ash", w:"R4-C", y:52, x:-2, t:"Entry", easy:false}, {n:"Twitch", w:"F2", y:68, x:-3, t:"Entry", easy:false}, {n:"Ace/Fuze", w:"AK-12", y:48, x:-1, t:"Support", easy:false},
+            {n:"Buck", w:"C8-SFW", y:58, x:-2, t:"Flex", easy:false}, {n:"Sledge", w:"L85A2", y:35, x:0, t:"Flex", easy:true}, {n:"Thatcher", w:"AR33", y:42, x:-1, t:"Support", easy:true},
+            {n:"Thermite", w:"556xi", y:40, x:0, t:"Support", easy:true}, {n:"IQ", w:"552 Commando", y:44, x:0, t:"Flex", easy:true}, {n:"Hibana", w:"Type-89", y:54, x:-2, t:"Support", easy:false},
+            {n:"Jackal", w:"C7E", y:45, x:0, t:"Flex", easy:true}, {n:"Ying", w:"T-95 LSW", y:42, x:0, t:"Entry", easy:true}, {n:"Zofia", w:"M762", y:62, x:3, t:"Entry", easy:false},
+            {n:"Dokkaebi", w:"Mk 14", y:40, x:0, t:"Support", easy:true}, {n:"Lion", w:"V308", y:45, x:0, t:"Support", easy:true}, {n:"Finka", w:"Spear", y:42, x:0, t:"Support", easy:true},
+            {n:"Maverick", w:"M4", y:48, x:1, t:"Support", easy:false}, {n:"Nomad", w:"ARX200", y:44, x:0, t:"Flex", easy:true}, {n:"Gridlock", w:"F90", y:42, x:0, t:"Support", easy:true},
+            {n:"Nøkk", w:"FMG-9", y:35, x:0, t:"Entry", easy:true}, {n:"Amaru", w:"G8A1", y:46, x:0, t:"Entry", easy:true}, {n:"Iana", w:"ARX200", y:44, x:0, t:"Entry", easy:true},
+            {n:"Zero", w:"SC3000K", y:50, x:-1, t:"Support", easy:true}, {n:"Flores", w:"AR33", y:42, x:-1, t:"Support", easy:true}, {n:"Osa", w:"556xi", y:40, x:0, t:"Support", easy:true},
+            {n:"Sens", w:"POF-9", y:65, x:4, t:"Support", easy:false}, {n:"Grim", w:"552 Commando", y:44, x:0, t:"Flex", easy:true}, {n:"Brava", w:"PARA-308", y:38, x:0, t:"Support", easy:true},
+            {n:"Ram", w:"R4-C", y:52, x:-2, t:"Flex", easy:false}, {n:"Deimos", w:"AK-74M", y:42, x:0, t:"Flex", easy:true}, {n:"Striker", w:"M4", y:48, x:1, t:"Flex", easy:false},
+            {n:"Smoke", w:"FMG-9", y:35, x:0, t:"Anchor", easy:true}, {n:"Mute", w:"MP5K", y:38, x:0, t:"Anchor", easy:true}, {n:"Castle", w:"UMP45", y:30, x:0, t:"Anchor", easy:true},
+            {n:"Pulse", w:"UMP45", y:30, x:0, t:"Roamer", easy:true}, {n:"Doc/Rook", w:"MP5", y:35, x:0, t:"Anchor", easy:true}, {n:"Kapkan", w:"9x19", y:35, x:0, t:"Trap", easy:true},
+            {n:"Tachanka", w:"DP27", y:40, x:0, t:"Anchor", easy:true}, {n:"Jäger", w:"416-C", y:45, x:2, t:"Roamer", easy:false}, {n:"Bandit", w:"MP7", y:42, x:-1, t:"Roamer", easy:true},
+            {n:"Frost", w:"9mm C1", y:28, x:0, t:"Trap", easy:true}, {n:"Valkyrie", w:"MPX", y:34, x:0, t:"Roamer", easy:true}, {n:"Caveira", w:"M12", y:28, x:0, t:"Roamer", easy:true},
+            {n:"Echo", w:"MP5SD", y:35, x:0, t:"Anchor", easy:true}, {n:"Mira", w:"Vector", y:65, x:-4, t:"Anchor", easy:false}, {n:"Lesion", w:"T-5", y:38, x:0, t:"Trap", easy:true},
+            {n:"Ela", w:"Scorpion", y:75, x:5, t:"Trap", easy:false}, {n:"Vigil", w:"K1A", y:36, x:0, t:"Roamer", easy:true}, {n:"Maestro", w:"ALDA", y:55, x:1, t:"Anchor", easy:false},
+            {n:"Alibi", w:"Mx4", y:44, x:0, t:"Roamer", easy:true}, {n:"Kaid", w:"AUG A3", y:34, x:0, t:"Anchor", easy:true}, {n:"Mozzie", w:"Roni", y:40, x:0, t:"Roamer", easy:true},
+            {n:"Warden", w:"MPX", y:34, x:0, t:"Anchor", easy:true}, {n:"Goyo", w:"Vector", y:65, x:-4, t:"Trap", easy:false}, {n:"Wamai", w:"MP5K", y:38, x:0, t:"Anchor", easy:true},
+            {n:"Oryx", w:"T-5", y:38, x:0, t:"Roamer", easy:true}, {n:"Melusi", w:"MP5", y:35, x:0, t:"Trap", easy:true}, {n:"Aruni", w:"Roni", y:40, x:0, t:"Anchor", easy:true},
+            {n:"Thunderbird", w:"Spear", y:42, x:0, t:"Anchor", easy:true}, {n:"Thorn", w:"UZK50", y:38, x:0, t:"Trap", easy:true}, {n:"Azami", w:"9x19", y:35, x:0, t:"Anchor", easy:true},
+            {n:"Solis", w:"P90", y:48, x:0, t:"Roamer", easy:true}, {n:"Fenrir", w:"MP7", y:42, x:-1, t:"Trap", easy:true}, {n:"Tubarão", w:"MPX", y:34, x:0, t:"Anchor", easy:true},
+            {n:"Skopós", w:"PCX-3", y:44, x:0, t:"Anchor", easy:true}, {n:"Sentry", w:"Commando 9", y:36, x:0, t:"Anchor", easy:true}
         ];
 
         let favorites = JSON.parse(localStorage.getItem('favGuns')) || [];
 
         function buildCard(op) {
             const isFav = favorites.includes(op.n);
-            return `
-                <div class="op-card" data-name="${op.n.toLowerCase()}" data-weapon="${op.w.toLowerCase()}">
-                    <span class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav('${op.n}')">★</span>
-                    <strong>${op.n}</strong>
-                    <div class="weapon">${op.w}</div>
-                    <button onclick="copy(this, '${op.n}', '${op.w}', ${op.y}, ${op.x})">COPY SCRIPT</button>
-                </div>`;
+            return `<div class="op-card" data-name="${op.n.toLowerCase()}" data-weapon="${op.w.toLowerCase()}">
+                <span class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav('${op.n}')">★</span>
+                <strong>${op.n}</strong><div class="weapon">${op.w}</div>
+                <button onclick="copy(this, '${op.n}', '${op.w}', ${op.y}, ${op.x}, ${op.easy})">COPY SCRIPT</button></div>`;
         }
 
-        function copy(btn, name, gun, y, x) {
-            const code = `--[[ASCII ART HERE]]\nEnablePrimaryMouseButtonEvents(true);\nlocal recoilX = ${x}\nlocal recoilY = ${y}...`; // truncated for brevity
-            navigator.clipboard.writeText(code);
+        function copy(btn, name, gun, y, x, easy) {
+            // DPI SCALING (Calculated for 5950 DPI)
+            const dpiScale = 0.32; 
+            // USER CONTROL (25% for hard guns, 35% for easy guns)
+            const assistStrength = easy ? 0.65 : 0.75;
+
+            const finalY = (y * dpiScale * assistStrength).toFixed(2);
+            const finalX = (x * dpiScale * assistStrength).toFixed(2);
+
+            const scriptContent = `--[[
+  ███╗   ██╗ ██████╗ ███╗   ███╗ █████╗ ██╗     ██╗   ██╗ ██████╗ 
+  ████╗  ██║██╔═══██╗████╗ ████║██╔══██╗██║     ╚██╗ ██╔╝██╔════╝ 
+  ██╔██╗ ██║██║   ██║██╔████╔██║███████║██║      ╚████╔╝ ╚█████╗  
+  ██║╚██╗██║██║   ██║██║╚██╔╝██║██╔══██║██║       ╚██╔╝   ╚═══██╗ 
+  ██║ ╚████║╚██████╔╝██║ ╚═╝ ██║██║  ██║███████╗   ██║   ██████╔╝ 
+  ╚═╝  ╚═══╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═════╝  
+                                                                  
+  [ STATUS: UNDETECTABLE ]   [ TYPE: EXTERNAL ]   [ DPI: 5950 ]
+  [ MODULE: MOMENTUM v4 ]    [ BUILD: 2026.04 ]   [ DEV: NOMALY ]
+  [ OPTIMIZED FOR: ${name} (${gun}) ]   [ USER CONTROL: ${easy ? '35%' : '25%'} ]
+--]]
+
+EnablePrimaryMouseButtonEvents(true);
+
+-- [[ CONFIGURATION ]]
+local recoilX = ${finalX}
+local recoilY = ${finalY}
+local key = "capslock"
+
+-- [[ STEALTH ENGINE STATE ]]
+local driftX = 0
+local driftY = 0
+
+function OnEvent(event, arg)
+    if IsKeyLockOn(key) then
+        if IsMouseButtonPressed(3) and IsMouseButtonPressed(1) then
+            
+            local shotPower = math.random(-2, 2) 
+            local shotBias = math.random(-1, 1)  
+            local shotSpeed = math.random(-2, 2) 
+
+            -- Reaction Delay
+            Sleep(math.random(15, 45)) 
+
+            repeat
+                -- MOMENTUM DRIFT
+                driftX = driftX + (math.random(-8, 8) / 10) 
+                driftY = driftY + (math.random(-8, 8) / 10)
+
+                if math.abs(driftX) > 2.5 then driftX = driftX * 0.7 end
+                if math.abs(driftY) > 3.5 then driftY = driftY * 0.7 end
+
+                -- MICRO-JITTER
+                local jitterX = math.random(-1, 1)
+                local jitterY = math.random(-1, 1)
+
+                -- MOVEMENT CALCULATION
+                local finalX = recoilX + shotBias + driftX + jitterX
+                local finalY = recoilY + shotPower + driftY + jitterY
+
+                MoveMouseRelative(math.floor(finalX), math.floor(finalY))
+
+                -- TIMING VARIATION
+                Sleep(math.random(9 + shotSpeed, 18 + shotSpeed)) 
+
+            until not IsMouseButtonPressed(1)
+            
+            driftX = 0
+            driftY = 0
+        end
+    end
+end`;
+            navigator.clipboard.writeText(scriptContent);
             btn.innerText = "COPIED!"; btn.className = "copied";
             setTimeout(() => { btn.innerText = "COPY SCRIPT"; btn.className = ""; }, 1500);
         }
@@ -136,20 +169,19 @@
         function updateUI() {
             const container = document.getElementById('main-content');
             container.innerHTML = '';
-            
-            // Favorites Section
             const favGrid = document.getElementById('fav-grid');
-            const favData = [...attackers, ...defenders].filter(op => favorites.includes(op.n));
+            const favData = allGuns.filter(op => favorites.includes(op.n));
             document.getElementById('favorites-section').style.display = favData.length ? 'block' : 'none';
             favGrid.innerHTML = favData.map(buildCard).join('');
 
-            // Group by Type
-            const types = [...new Set([...attackers, ...defenders].map(o => o.t))];
+            const types = ["Entry", "Flex", "Support", "Anchor", "Roamer", "Trap"];
             types.forEach(type => {
-                const ops = [...attackers, ...defenders].filter(o => o.t === type);
-                const section = document.createElement('div');
-                section.innerHTML = `<div class="category">${type}</div><div class="grid">${ops.map(buildCard).join('')}</div>`;
-                container.appendChild(section);
+                const ops = allGuns.filter(o => o.t === type);
+                if (ops.length) {
+                    const section = document.createElement('div');
+                    section.innerHTML = `<div class="category">${type}</div><div class="grid">${ops.map(buildCard).join('')}</div>`;
+                    container.appendChild(section);
+                }
             });
             filterCards(document.getElementById('search-bar').value);
         }
