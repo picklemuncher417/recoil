@@ -20,7 +20,7 @@ button { background: #00ff00; color: #000; border: none; padding: 8px; cursor: p
 #mainContent { display:none; }
 #status { font-weight: bold; margin-top: 15px; }
 input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8px; text-align: center; width: 280px; }
-.debug-btn { background: #333; color: #888; font-size: 10px; margin-top: 20px; padding: 4px 8px; }
+.debug-btn { background: #333; color: #888; font-size: 10px; margin-top: 20px; padding: 4px 8px; cursor: pointer; }
 </style>
 </head>
 
@@ -52,34 +52,39 @@ input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8p
     <div class="category secondary">Secondary SMGs</div>
     <div id="secondary-grid" class="grid"></div>
     
-    <center><button onclick="clearSession()" style="background:#444; color:#fff; margin-bottom:50px;">LOGOUT / LOCK ENGINE</button></center>
+    <center><button onclick="clearSession()" style="background:#444; color:#fff; margin-bottom:50px; padding:10px;">LOGOUT / LOCK ENGINE</button></center>
 </div>
 
 <script>
-/* ================= WHITELIST SYSTEM (WITH CACHE BUSTER) ================= */
+/* ================= WHITELIST SYSTEM (LIVE GITHUB PAGES FIX) ================= */
 
-const gistBase = "https://githubusercontent.com";
+const rawGist = "https://githubusercontent.com";
+const whitelistURL = "https://corsproxy.io?" + encodeURIComponent(rawGist + "?t=" + Date.now());
+
 let allowedKeys = [];
 
 async function fetchKeys() {
     try {
-        // Adding a timestamp to the URL forces the browser to get the freshest data
-        const response = await fetch(gistBase + "?t=" + Date.now());
+        const response = await fetch(whitelistURL);
         if (!response.ok) throw new Error();
         const data = await response.text();
+        
+        // Split by lines, trim whitespace, and remove empty lines
         allowedKeys = data.split(/\r?\n/).map(k => k.trim()).filter(k => k.length > 0);
-        console.log("Keys synced: ", allowedKeys.length);
+        console.log("Database connected. Keys synced.");
     } catch (err) {
-        document.getElementById("status").innerText = "CONNECTION ERROR - CHECK INTERNET";
+        console.error(err);
+        document.getElementById("status").innerText = "CONNECTION ERROR - REFRESH PAGE";
     }
 }
 
 async function checkKey(){
-    const input = document.getElementById("keyInput").value.trim();
+    const inputField = document.getElementById("keyInput");
+    const input = inputField.value.trim();
     const status = document.getElementById("status");
 
     status.innerText = "VERIFYING...";
-    await fetchKeys(); // Ensure we have the latest list
+    await fetchKeys(); // Ensure we have the latest list from the Gist
 
     if(allowedKeys.includes(input)){
         localStorage.setItem("active_key", input);
@@ -87,6 +92,7 @@ async function checkKey(){
     } else {
         status.innerText = "INVALID ACCESS KEY";
         status.style.color = "red";
+        inputField.value = ""; // Clear input for retry
     }
 }
 
@@ -100,7 +106,7 @@ function clearSession(){
     location.reload();
 }
 
-// Check if user is already logged in on load
+// Check login status on page load
 window.onload = async () => {
     await fetchKeys();
     const savedKey = localStorage.getItem("active_key");
@@ -109,7 +115,7 @@ window.onload = async () => {
     }
 };
 
-/* ================= FULL OPERATOR DATA (ALL GUNS) ================= */
+/* ================= FULL OPERATOR DATA ================= */
 
 const attackers = [
  {n:"Ash", w:"R4-C", y:52, x:-2}, {n:"Twitch", w:"F2", y:68, x:-3}, {n:"Ace/Fuze", w:"AK-12", y:48, x:-1},
