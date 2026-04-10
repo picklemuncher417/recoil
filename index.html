@@ -18,21 +18,25 @@ button { background: #00ff00; color: #000; border: none; padding: 8px; cursor: p
 
 #authBox { text-align:center; margin-top:120px; }
 #mainContent { display:none; }
+#status { font-weight: bold; margin-top: 15px; }
+input { background: #111; border: 1px solid #00ff00; color: #00ff00; padding: 8px; text-align: center; width: 250px; }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN SCREEN -->
 <div id="authBox">
-    <h2>ENTER ACCESS KEY</h2>
-    <input type="text" id="keyInput" placeholder="Enter key">
+    <h1>MOMENTUM v4</h1>
+    <div class="credit">SECURITY GATEWAY</div>
+    <br>
+    <input type="text" id="keyInput" placeholder="ENTER ACCESS KEY">
     <br><br>
-    <button onclick="checkKey()">Unlock</button>
+    <button onclick="checkKey()">UNLOCK ENGINE</button>
     <p id="status"></p>
 </div>
 
-<!-- MAIN SITE -->
+<!-- MAIN SITE CONTENT -->
 <div id="mainContent">
 
 <h1>MOMENTUM v4 ENGINE</h1>
@@ -50,51 +54,53 @@ button { background: #00ff00; color: #000; border: none; padding: 8px; cursor: p
 </div>
 
 <script>
-/* ================= WHITELIST ================= */
+/* ================= WHITELIST SYSTEM ================= */
 
-const pastebinURL = "https://pastebin.com/raw/5Ss5zQ3k"; // YOUR LINK
+// !!! REPLACE THIS WITH YOUR RAW GITHUB GIST LINK !!!
+const whitelistURL = "https://gist.githubusercontent.com/picklemuncher417/8bdc7ab2ce82d21624c9187f43d25842/raw/gistfile1.txt"; 
 let allowedKeys = [];
 
-fetch(pastebinURL)
-.then(res => res.text())
+// Fetching from GitHub Gist fixes the "CORS/Access-Control" error
+fetch(whitelistURL)
+.then(res => {
+    if (!res.ok) throw new Error("Connection failed");
+    return res.text();
+})
 .then(data => {
-    allowedKeys = data.split("\n").map(k => k.trim());
+    // Splits keys by line and removes empty spaces
+    allowedKeys = data.split(/\r?\n/).map(k => k.trim()).filter(k => k.length > 0);
+    console.log("Database connected.");
+    
+    // Auto-login check
+    const savedKey = localStorage.getItem("active_key");
+    if(savedKey && allowedKeys.includes(savedKey)) {
+        unlock();
+    }
+})
+.catch(err => {
+    console.error(err);
+    document.getElementById("status").innerText = "SERVER CONNECTION ERROR";
 });
 
-/* ===== 24H + 1 USER LOCK ===== */
-
-const savedKey = localStorage.getItem("key");
-const savedTime = localStorage.getItem("time");
-
-if(savedKey && savedTime){
-    const now = Date.now();
-    const diff = now - parseInt(savedTime);
-
-    if(diff < 86400000){ // 24 hours
-        unlock();
-    } else {
-        localStorage.clear();
-    }
-}
+/* ===== AUTH LOGIC ===== */
 
 function checkKey(){
     const input = document.getElementById("keyInput").value.trim();
     const status = document.getElementById("status");
 
     if(allowedKeys.includes(input)){
-
-        // prevent reuse on same browser
-        if(localStorage.getItem("key") && localStorage.getItem("key") !== input){
-            status.innerText = "DEVICE ALREADY USED A KEY";
+        // Prevent key sharing on the same browser
+        if(localStorage.getItem("active_key") && localStorage.getItem("active_key") !== input){
+            status.innerText = "DEVICE ALREADY BOUND TO ANOTHER KEY";
+            status.style.color = "red";
             return;
         }
 
-        localStorage.setItem("key", input);
-        localStorage.setItem("time", Date.now());
-
+        localStorage.setItem("active_key", input);
         unlock();
     } else {
-        status.innerText = "INVALID KEY";
+        status.innerText = "INVALID ACCESS KEY";
+        status.style.color = "red";
     }
 }
 
@@ -103,7 +109,7 @@ function unlock(){
     document.getElementById("mainContent").style.display = "block";
 }
 
-/* ================= YOUR ORIGINAL DATA ================= */
+/* ================= OPERATOR DATA ================= */
 
 const attackers = [
  {n:"Ash", w:"R4-C", y:52, x:-2}, {n:"Twitch", w:"F2", y:68, x:-3}, {n:"Ace/Fuze", w:"AK-12", y:48, x:-1},
@@ -128,7 +134,7 @@ const secondaries = [
  {n:"Glaz/Kali", w:"SPSMG9", y:48, x:0}
 ];
 
-/* ================= BUILD ================= */
+/* ================= BUILD ENGINE ================= */
 
 function build(list, gridId){
     const grid = document.getElementById(gridId);
@@ -142,18 +148,14 @@ function build(list, gridId){
     });
 }
 
-/* ================= COPY ================= */
-
 function copy(btn, y, x){
-    const code = "recoilX=" + x + "\\nrecoilY=" + y;
+    const code = "recoilX=" + x + "\nrecoilY=" + y;
     navigator.clipboard.writeText(code);
 
     btn.innerText = "COPIED!";
     btn.className = "copied";
     setTimeout(()=>{ btn.innerText="GET V4 ENGINE"; btn.className=""; },1500);
 }
-
-/* ================= INIT ================= */
 
 build(attackers, 'attack-grid');
 build(defenders, 'defend-grid');
